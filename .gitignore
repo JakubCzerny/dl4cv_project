@@ -1,0 +1,6 @@
+# ignore .pyc files
+*.pyc
+
+# ignore the data itself but not the readme file
+/data/*
+!/data/readme
