@@ -5,5 +5,5 @@
 data/*
 !data/readme
 
-models/Error*
-models/Output*
+Error*
+Output*
