@@ -9,13 +9,16 @@ from keras.models import Model, load_model
 from keras.layers import Dense, GlobalAveragePooling2D, Dropout, Flatten
 from keras import optimizers, callbacks
 
+import tensorflow as tf
+sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
+print K.tensorflow_backend._get_available_gpus()
+
 model_name = 'vgg16__FC'
-target_size = (100,100)
+target_size = (224,224)
 
 PATH_TRAIN = 'data/train'
 PATH_TEST = 'data/test'
-PATH_MODELS = 'model/trained'
-PATH_NETWORK = PATH_MODELS + model_name + '.hdf5'
+PATH_MODELS = 'model/trained/'
 
 def train(batchsize, epochs, l_nodes, l_dropouts, l_rate, momentum):
     datagen = image.ImageDataGenerator(
@@ -83,4 +86,4 @@ def train(batchsize, epochs, l_nodes, l_dropouts, l_rate, momentum):
     print "Final Accuracy: {:.2f}%".format(accuracy * 100)
 
 
-train(50,1,[100],[0],0.003,0.95)
+train(200,5,[100,100],[0,0],0.003,0.95)
