@@ -1,4 +1,4 @@
-#!/bin/sh
+!/bin/sh
 echo 'submitting job..'
 ### General options
 
@@ -12,10 +12,13 @@ echo 'submitting job..'
 # BSUB -n 2
 
 ### -- reserve GPUs exclusively
-# BSUB -R "rusage[ngpus_excl_p=1]"
+# BSUB -gpu "num=1:mode=exclusive_process"
 
 ### -- set walltime limit: hh:mm --
 #BSUB -W 24:00
+
+# request 5GB of memory
+#BSUB -R "rusage[mem=5GB]"
 
 ### -- set the email address --
 #BSUB -u kuba.czerny@poczta.fm
@@ -31,11 +34,16 @@ echo 'submitting job..'
 #BSUB -o Output_%J.out
 #BSUB -e Error_%J.err
 
+module load python/2.7.12_ucs4
 module load cuda/8.0
-module load cudnn
+module load cudnn/v6.0-prod
+
+source ~/envs/dl4cv/bin/activate
+
+nvidia-smi
+python
 
 # here follow the commands you want to execute
 echo 'starting main.py..'
-##time python main.py > job_output.txt
 time python models/vgg16.py > job_output.txt
 echo 'job finished'
