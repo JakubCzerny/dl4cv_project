@@ -20,10 +20,10 @@ PATH_TEST = 'data/test'
 PATH_MODELS = 'models/trained/'
 
 def train(batchsize, epochs, l_nodes, l_dropouts, l_rate, momentum):
-    model_name = 'vgg16_FC_'+epochs+'_'+l_nodes+'_'+l_dropouts+'_'+l_rate+'_'
+    model_name = 'vgg16_FC_'+str(epochs)+'_'+str(l_nodes)+'_'+str(l_dropouts)+'_'+str(l_rate)+'_'
 
     datagen = image.ImageDataGenerator(
-        preprocessing_function=imagenet_utils.preprocess_input
+        preprocessing_function=imagenet_utils.preprocess_input,
         horizontal_flip=True,
         shear_range=0.15
     )
