@@ -13,7 +13,6 @@ import tensorflow as tf
 sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
 print K.tensorflow_backend._get_available_gpus()
 
-model_name = 'vgg16_FC_'
 target_size = (224,224)
 
 PATH_TRAIN = 'data/train'
@@ -21,10 +20,12 @@ PATH_TEST = 'data/test'
 PATH_MODELS = 'models/trained/'
 
 def train(batchsize, epochs, l_nodes, l_dropouts, l_rate, momentum):
+    model_name = 'vgg16_FC_'+epochs+'_'+l_nodes+'_'+l_dropouts+'_'+l_rate+'_'
+
     datagen = image.ImageDataGenerator(
         preprocessing_function=imagenet_utils.preprocess_input
-        # horizontal_flip=True,
-        # shear_range=0.15
+        horizontal_flip=True,
+        shear_range=0.15
     )
 
     train_generator = datagen.flow_from_directory(
@@ -61,7 +62,7 @@ def train(batchsize, epochs, l_nodes, l_dropouts, l_rate, momentum):
     try:
         model.fit_generator(
             train_generator,
-            steps_per_epoch=num_train/batchsize,
+            steps_per_epoch=num_train/batchsize*2.0,
             validation_data=test_generator,
             validation_steps=num_test/batchsize,
             epochs=epochs,
@@ -87,6 +88,17 @@ def train(batchsize, epochs, l_nodes, l_dropouts, l_rate, momentum):
 l_rates = [1e-2, 5e-3, 1e-3, 5e-4, 1e-5, 5e-6]
 l_nodes = [[100],[200],[500],[1000]]
 dropouts = [[0],[0.2],[0.5]]
+epochs = 20
+
+for lr in l_rates:
+    for nodes in l_nodes:
+        for dropouts in dropouts:
+            train(200,epochs,nodes,dropouts,lr,0.95)
+
+
+l_rates = [1e-3, 5e-4, 1e-5]
+l_nodes = [[100,100],[200,200],[500,500]]
+dropouts = [[0,0],[0.5,0.5],[0,0.5]]
 epochs = 20
 
 for lr in l_rates:
