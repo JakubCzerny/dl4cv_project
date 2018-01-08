@@ -13,12 +13,12 @@ import tensorflow as tf
 sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
 print K.tensorflow_backend._get_available_gpus()
 
-model_name = 'vgg16__FC'
+model_name = 'vgg16_FC_'
 target_size = (224,224)
 
 PATH_TRAIN = 'data/train'
 PATH_TEST = 'data/test'
-PATH_MODELS = 'model/trained/'
+PATH_MODELS = 'models/trained/'
 
 def train(batchsize, epochs, l_nodes, l_dropouts, l_rate, momentum):
     datagen = image.ImageDataGenerator(
