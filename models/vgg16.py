@@ -27,8 +27,6 @@ def train(batchsize, epochs, l_nodes, l_dropouts, l_rate, momentum):
         # shear_range=0.15
     )
 
-    print os.getcwd()
-
     train_generator = datagen.flow_from_directory(
         PATH_TRAIN,
         batch_size=batchsize,
@@ -86,4 +84,12 @@ def train(batchsize, epochs, l_nodes, l_dropouts, l_rate, momentum):
     print "Final Accuracy: {:.2f}%".format(accuracy * 100)
 
 
-train(200,5,[100,100],[0,0],0.003,0.95)
+l_rates = [1e-2, 5e-3, 1e-3, 5e-4, 1e-5, 5e-6]
+l_nodes = [[100],[200],[500],[1000]]
+dropouts = [[0],[0.2],[0.5]]
+epochs = 20
+
+for lr in l_rates:
+    for nodes in l_nodes:
+        for dropouts in dropouts:
+            train(200,epochs,nodes,dropouts,lr,0.95)
