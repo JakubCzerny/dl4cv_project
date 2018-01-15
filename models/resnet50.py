@@ -21,6 +21,7 @@ PATH_MODELS = 'models/trained/'
 
 def train(batchsize, epochs, l_nodes, l_dropouts, l_rate, momentum, modules_to_drop):
     model_name = 'ResNet50_FC_'+str(epochs)+'_'+str(l_nodes)+'_'+str(l_dropouts)+'_'+str(l_rate)+'_'
+    print "Training:",model_name
 
     datagen = image.ImageDataGenerator(
         preprocessing_function=imagenet_utils.preprocess_input,
@@ -87,7 +88,7 @@ def train(batchsize, epochs, l_nodes, l_dropouts, l_rate, momentum, modules_to_d
             callbacks=[
                 callbacks.ModelCheckpoint(filepath=PATH_MODELS + model_name+'{val_acc:.2f}.hdf5',
                                           monitor='val_acc', save_best_only=True, save_weights_only=False),
-                callbacks.EarlyStopping(monitor='val_loss', patience=2),
+                callbacks.EarlyStopping(monitor='val_loss', patience=3),
             ],
         )
     except KeyboardInterrupt:

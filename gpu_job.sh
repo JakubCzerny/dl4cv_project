@@ -9,7 +9,7 @@ echo 'submitting job..'
 #BSUB -J train_VGG16
 
 ### -- ask for number of cores (default: 1) --
-# BSUB -n 2
+# BSUB -n 4
 
 ### -- reserve GPUs exclusively
 # BSUB -gpu "num=1:mode=exclusive_process"
