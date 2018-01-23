@@ -6,6 +6,7 @@ from keras.applications import resnet50
 from keras.applications import imagenet_utils
 from keras.preprocessing import image
 from keras.models import Model, load_model
+from keras import regularizers
 from keras.layers import Dense, GlobalAveragePooling2D, Dropout, Flatten
 from keras import optimizers, callbacks
 
@@ -13,20 +14,21 @@ import tensorflow as tf
 sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
 print K.tensorflow_backend._get_available_gpus()
 
-target_size = (224,224)
+target_size = (350,350)
 
 PATH_TRAIN = 'data/train'
 PATH_TEST = 'data/test'
 PATH_MODELS = 'models/trained/'
 
 def train(batchsize, epochs, l_nodes, l_dropouts, l_rate, momentum, modules_to_drop):
-    model_name = 'ResNet50_FC_'+str(epochs)+'_'+str(l_nodes)+'_'+str(l_dropouts)+'_'+str(l_rate)+'_'
+    model_name = 'ResNet50_FC_'+str(epochs)+'_'+str(l_nodes)+'_'+str(l_dropouts)+'_'+str(l_rate)+'_'+str(modules_to_drop)+'_'
     print "Training:",model_name
 
     datagen = image.ImageDataGenerator(
         preprocessing_function=imagenet_utils.preprocess_input,
         horizontal_flip=True,
-        shear_range=0.15
+        shear_range=0.1,
+        rotation_range=10
     )
 
     train_generator = datagen.flow_from_directory(
@@ -57,7 +59,7 @@ def train(batchsize, epochs, l_nodes, l_dropouts, l_rate, momentum, modules_to_d
     base_model = resnet50.ResNet50(include_top=False, weights='imagenet')
 
     # To keep trainable last conv module use :147
-    for layer in model.layers[:159]:
+    for layer in base_model.layers[:159]:
         layer.trainable = False
 
     for i in range(layers_to_drop):
@@ -68,12 +70,12 @@ def train(batchsize, epochs, l_nodes, l_dropouts, l_rate, momentum, modules_to_d
     x = base_model.layers[-1].output
     x = GlobalAveragePooling2D()(x)
 
-    predictions = Dense(120, activation='softmax')(x)
-    model = Model(inputs=base_model.input, outputs=predictions)
-
     for nodes, dropout in zip(l_nodes, l_dropouts):
         x = Dense(nodes, activation='relu')(x)
         x = Dropout(dropout)(x)
+        
+    predictions = Dense(120, activation='softmax', kernel_regularizer=regularizers.l2(0.01))(x)
+    model = Model(inputs=base_model.input, outputs=predictions)
 
     model.compile(optimizer=optimizers.RMSprop(lr=l_rate), loss='categorical_crossentropy', metrics=['acc'])
 
