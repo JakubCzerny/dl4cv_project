@@ -23,9 +23,9 @@ PATH_TEST = 'data/test'
 PATH_MODELS = 'models/trained/'
 
 def loss_l2(y_true, y_pred):
-    return np.mean(np.power(np.subtract(y_true, y_pred),2))
+    return K.mean(K.pow(np.subtract(y_true, y_pred),2))
 
-def train(batchsize, epochs, l_nodes, l_dropouts, l_rate, momentum, modules_to_drop):
+def train(batchsize, epochs, l_nodes, l_dropouts, l_rate, momentum):
     model_name = 'ResNet50_FC_localization_'+str(epochs)+'_'+str(l_nodes)+'_'+str(l_dropouts)+'_'+str(l_rate)+'_'
     print "Training:",model_name
 
@@ -52,26 +52,17 @@ def train(batchsize, epochs, l_nodes, l_dropouts, l_rate, momentum, modules_to_d
     num_train = train_generator.n
     num_test = test_generator.n
 
-    if modules_to_drop == 0:
-        layers_to_drop = 0
-    elif modules_to_drop == 1:
-        layers_to_drop = 11
-    elif modules_to_drop == 2:
-        layers_to_drop = 21
-    elif modules_to_drop == 3:
-        layers_to_drop = 33
+    file_name = 'ResNet50_FC_30_[700]_[0.5]_2e-05_1_0.81.hdf5'
+    base_model = load_model(PATH_MODELS+file_name)
 
-
-    base_model = resnet50.ResNet50(include_top=False, weights='imagenet')
-
-    # To keep trainable last conv module use :147
-    for layer in base_model.layers[:159]:
-        layer.trainable = False
-
-    for i in range(layers_to_drop):
+    # Remove 4 last laters which are part of classification network
+    for i in range(4):
         base_model.layers.pop()
         base_model.outputs = [base_model.layers[-1].output]
         base_model.layers[-1].outbound_nodes = []
+
+    for layer in base_model.layers:
+        layer.trainable = False
 
     x = base_model.layers[-1].output
     x = GlobalAveragePooling2D()(x)
@@ -83,7 +74,7 @@ def train(batchsize, epochs, l_nodes, l_dropouts, l_rate, momentum, modules_to_d
     predictions = Dense(4, activation='linear')(x)
     model = Model(inputs=base_model.input, outputs=predictions)
 
-    model.compile(optimizer=optimizers.SGD(lr=l_rate), loss=loss_l2, metrics=['acc'])
+    model.compile(optimizer=optimizers.SGD(lr=l_rate), loss=loss_l2, metrics=['mae'])
 
     try:
         model.fit_generator(
@@ -111,17 +102,15 @@ def train(batchsize, epochs, l_nodes, l_dropouts, l_rate, momentum, modules_to_d
     print "Final Accuracy: {:.2f}%".format(accuracy * 100)
 
 
-l_rates = [1e-3, 5e-4, 1e-5]
-l_nodes = [[100],[200],[500],[1000]]
+l_rates = [1e-5, 5e-5, 5e-4]
+l_nodes = [[50],[100],[200],[500],[1000]]
 dropouts = [[0],[0.25],[0.5]]
 epochs = 20
-modules_to_drop = [0,1]
 
 for lr in l_rates:
     for nodes in l_nodes:
         for dropouts in dropouts:
-            for to_drop in modules_to_drop:
-                train(10,epochs,nodes,dropouts,lr,0.95,to_drop)
+            train(200,epochs,nodes,dropouts,lr,0.95)
 
 
 # l_rates = [1e-3, 5e-4, 1e-5]
