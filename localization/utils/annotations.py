@@ -15,4 +15,8 @@ def load_annotations(fname):
             else:
                 bboxes[idx] = [value]
 
-    return bboxes['0']
+    x0 = bboxes['0'][0]
+    y0 = bboxes['0'][1]
+    w  = bboxes['0'][2] - bboxes['0'][0]
+    h  = bboxes['0'][3] - bboxes['0'][1]
+    return [x0,y0,w,h]

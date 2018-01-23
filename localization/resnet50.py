@@ -85,8 +85,8 @@ def train(batchsize, epochs, l_nodes, l_dropouts, l_rate, momentum):
             epochs=epochs,
             use_multiprocessing=True,
             callbacks=[
-                callbacks.ModelCheckpoint(filepath=PATH_MODELS + model_name+'{val_acc:.2f}.hdf5',
-                                          monitor='val_acc', save_best_only=True, save_weights_only=False),
+                callbacks.ModelCheckpoint(filepath=PATH_MODELS + model_name+'{val_loss:.2f}.hdf5',
+                                          monitor='val_loss', save_best_only=True, save_weights_only=False),
                 callbacks.EarlyStopping(monitor='val_loss', patience=3),
             ],
         )
@@ -110,7 +110,7 @@ epochs = 20
 for lr in l_rates:
     for nodes in l_nodes:
         for dropouts in dropouts:
-            train(200,epochs,nodes,dropouts,lr,0.95)
+            train(40,epochs,nodes,dropouts,lr,0.95)
 
 
 # l_rates = [1e-3, 5e-4, 1e-5]
