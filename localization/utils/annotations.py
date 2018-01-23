@@ -23,17 +23,20 @@ def load_annotations(fname, target_size):
     width_ratio  = float(target_size[0]) / original_size['width']
     height_ratio = float(target_size[1]) / original_size['height']
 
-    print width_ratio, height_ratio
-
     for bbox in bboxes.values():
-        print bbox[0]
         bbox[0] *= width_ratio
         bbox[1] *= height_ratio
         bbox[2] *= width_ratio
         bbox[3] *= height_ratio
 
-    x0 = bboxes['0'][0]
-    y0 = bboxes['0'][1]
-    w  = bboxes['0'][2] - bboxes['0'][0]
-    h  = bboxes['0'][3] - bboxes['0'][1]
-    return [x0,y0,w,h]
+    # x0 = bboxes['0'][0]
+    # y0 = bboxes['0'][1]
+    # w  = bboxes['0'][2] - bboxes['0'][0]
+    # h  = bboxes['0'][3] - bboxes['0'][1]
+    # return [x0,y0,w,h]
+
+    xmin = bboxes['0'][0]
+    ymin = bboxes['0'][1]
+    xmax = bboxes['0'][2]
+    ymax = bboxes['0'][3]
+    return [xmin,ymin,xmax,ymax]
