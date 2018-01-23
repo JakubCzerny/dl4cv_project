@@ -6,7 +6,7 @@ echo 'submitting job..'
 #BSUB -q gputitanxpascal
 
 ### -- set the job Name --
-#BSUB -J train_VGG16
+#BSUB -J train_restnet_localization
 
 ### -- ask for number of cores (default: 1) --
 # BSUB -n 4
@@ -45,5 +45,6 @@ python
 
 # here follow the commands you want to execute
 echo 'starting main.py..'
-time python models/vgg16.py > job_output.txt
+#time python models/vgg16.py > job_output.txt
+time python localization/resnet50.py > localization_job_output.txt
 echo 'job finished'
