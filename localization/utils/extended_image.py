@@ -1138,8 +1138,7 @@ class DirectoryIterator(Iterator):
         elif self.class_mode == 'bboxes':
             batch_y = np.zeros((len(batch_x), 4), dtype=K.floatx())
             for i, fname in enumerate(filenames):
-                # print fname
-                batch_y[i,:] = load_annotations(fname)
+                batch_y[i,:] = load_annotations(fname, self.image_shape)
         else:
             return batch_x
         return batch_x, batch_y
