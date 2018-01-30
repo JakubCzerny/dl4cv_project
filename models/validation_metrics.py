@@ -38,15 +38,19 @@ generator = datagen.flow_from_directory(
     batch_size=batchsize,
     target_size=target_size
 )
+num = generator.n
 
-best_model = 'ResNet50_FC_30_[700]_[0.5]_2e-05_1_0.81.hdf5'
+best_model = 'ResNet50_TUNE_CONV_10_1e-05_0.82.hdf5'
+# best_model = 'ResNet50_FC_30_[700]_[0.5]_2e-05_1_0.81.hdf5'
 model = load_model(PATH_MODELS+best_model)
 
-probs = model.predict_generator(generator, workers=4, use_multiprocessing=True, verbose=1)
-
-# x,y = generator.next()
-# y = np.argmax(y, axis=1)
-# probs = model.predict_on_batch(x)
+probs = []
+y = []
+for idx in range(int(num / float(batchsize))):
+    x_batch,y_batch = generator.next()
+    probs_batch = model.predict_on_batch(x_batch)
+    y.extend(y_batch)
+    probs.extend(probs_batch)
 
 print acc_top_n(y, probs, 1)
 print acc_top_n(y, probs, 2)
