@@ -37,6 +37,11 @@ def train(batchsize, epochs, l_rate, momentum):
         target_size=target_size
     )
 
+    datagen = image.ImageDataGenerator(
+        preprocessing_function=imagenet_utils.preprocess_input,
+        horizontal_flip=True,
+    )
+
     test_generator = datagen.flow_from_directory(
         PATH_TEST,
         batch_size=batchsize,
@@ -71,6 +76,7 @@ def train(batchsize, epochs, l_rate, momentum):
                 callbacks.EarlyStopping(monitor='val_loss', patience=3),
             ],
         )
+
     except KeyboardInterrupt:
         pass
 
@@ -84,8 +90,8 @@ def train(batchsize, epochs, l_rate, momentum):
 
 
 l_rates = [1e-5, 5e-4, 1e-4]
-epochs = 10
-batch_size = 30
+epochs = 15
+batch_size = 128
 
 for lr in l_rates:
     train(batch_size,epochs,lr,0.95)
