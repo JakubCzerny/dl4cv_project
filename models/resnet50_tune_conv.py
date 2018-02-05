@@ -1,3 +1,10 @@
+'''
+    Author: Jakub Czerny
+    Email: jakub-czerny@outlook.com
+    Deep Learning for Computer Vision
+    Python Version: 2.7
+'''
+
 import glob
 from pathlib import Path
 import os

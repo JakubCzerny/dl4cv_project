@@ -1,8 +1,15 @@
-# Nagivate to data/test/ and run cmd
+'''
+    Author: Jakub Czerny
+    Email: jakub-czerny@outlook.com
+    Deep Learning for Computer Vision
+    Python Version: 2.7
+'''
+
+# Nagivate to data/test/ and run command:
 # find . -name \*.jpg -type f -delete
 
 # The you're left with the folder structure and complete dataset in train/
-# Now let's subselect __% of the data and move it to test
+# Now let's subselect __% of the data and move it to test by running this script
 
 
 # This should be run from data/

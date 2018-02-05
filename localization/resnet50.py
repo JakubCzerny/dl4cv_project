@@ -1,3 +1,10 @@
+'''
+    Author: Jakub Czerny
+    Email: jakub-czerny@outlook.com
+    Deep Learning for Computer Vision
+    Python Version: 2.7
+'''
+
 from utils import extended_image as extended_image
 
 import os
@@ -22,11 +29,13 @@ PATH_TRAIN = 'data/train'
 PATH_TEST = 'data/test'
 PATH_MODELS = 'models/trained/'
 
+# It's nothing else than sum square of errors
 def loss_l2(y_true, y_pred):
     y_true = tf.clip_by_value(y_true,0,target_size[0])
     y_pred = tf.clip_by_value(y_pred,0,target_size[0])
     return K.mean(K.pow(np.subtract(y_true, y_pred),2))
 
+# Intersetion over Union as the metric of goodness of the model
 smooth = 1
 def IoU(y_true, y_pred):
     x11, y11, x12, y12 = tf.split(tf.clip_by_value(y_true,0,target_size[0]), 4, axis=1)
@@ -55,6 +64,10 @@ def train(batchsize, epochs, l_nodes, l_dropouts, l_rate, momentum):
         preprocessing_function=imagenet_utils.preprocess_input,
     )
 
+    '''
+        I had to modify Keras datagenerator by adding `class_mode` to load also the bounding boxes coordinates
+    '''
+
     train_generator = datagen.flow_from_directory(
         PATH_TRAIN,
         batch_size=batchsize,
@@ -72,6 +85,8 @@ def train(batchsize, epochs, l_nodes, l_dropouts, l_rate, momentum):
     num_train = train_generator.n
     num_test = test_generator.n
 
+
+    # Load the best classifier
     file_name = 'ResNet50_classifiacation_0.82.hdf5'
     base_model = load_model(PATH_MODELS+file_name)
 
