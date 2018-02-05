@@ -9,7 +9,7 @@ from keras.applications import resnet50
 from keras.applications import imagenet_utils
 from keras.preprocessing import image
 from keras.models import Model, load_model
-from keras.layers import Dense, GlobalAveragePooling2D, Dropout, Flatten
+from keras.layers import Dense, GlobalAveragePooling2D, Dropout, Flatten, Conv2D
 from keras import optimizers, callbacks
 
 import tensorflow as tf
@@ -23,6 +23,8 @@ PATH_TEST = 'data/test'
 PATH_MODELS = 'models/trained/'
 
 def loss_l2(y_true, y_pred):
+    y_true = tf.clip_by_value(y_true,0,target_size[0])
+    y_pred = tf.clip_by_value(y_pred,0,target_size[0])
     return K.mean(K.pow(np.subtract(y_true, y_pred),2))
 
 smooth = 1
@@ -51,8 +53,6 @@ def train(batchsize, epochs, l_nodes, l_dropouts, l_rate, momentum):
 
     datagen = extended_image.ImageDataGenerator(
         preprocessing_function=imagenet_utils.preprocess_input,
-        horizontal_flip=True,
-        shear_range=0.05
     )
 
     train_generator = datagen.flow_from_directory(
@@ -72,7 +72,7 @@ def train(batchsize, epochs, l_nodes, l_dropouts, l_rate, momentum):
     num_train = train_generator.n
     num_test = test_generator.n
 
-    file_name = 'ResNet50_FC_30_[700]_[0.5]_2e-05_1_0.81.hdf5'
+    file_name = 'ResNet50_classifiacation_0.82.hdf5'
     base_model = load_model(PATH_MODELS+file_name)
 
     # Remove 4 last laters which are part of classification network
@@ -85,29 +85,31 @@ def train(batchsize, epochs, l_nodes, l_dropouts, l_rate, momentum):
         layer.trainable = False
 
     x = base_model.layers[-1].output
+    #x = Conv2D(filters=512,kernel_size=(3,3),strides=(1,1),padding="same")(x)
+    #x = Conv2D(filters=256,kernel_size=(2,2),strides=(1,1),padding="same")(x)
     x = GlobalAveragePooling2D()(x)
 
     for nodes, dropout in zip(l_nodes, l_dropouts):
         x = Dense(nodes, activation='relu')(x)
         x = Dropout(dropout)(x)
 
-    predictions = Dense(4, activation='linear')(x)
+    predictions = Dense(4,activation='linear')(x)
     model = Model(inputs=base_model.input, outputs=predictions)
 
-    model.compile(optimizer=optimizers.SGD(lr=l_rate), loss=loss_l2, metrics=[IoU])
+    model.compile(optimizer=optimizers.RMSprop(lr=l_rate), loss=loss_l2, metrics=[IoU])
 
     try:
         model.fit_generator(
             train_generator,
-            steps_per_epoch=num_train/batchsize*2.0,
+            steps_per_epoch=num_train/batchsize,
             validation_data=test_generator,
             validation_steps=num_test/batchsize,
             epochs=epochs,
             use_multiprocessing=True,
             callbacks=[
-                callbacks.ModelCheckpoint(filepath=PATH_MODELS + model_name+'{IoU:.2f}.hdf5',
-                                          monitor='IoU', mode='max', save_best_only=True, save_weights_only=False),
-                callbacks.EarlyStopping(monitor='IoU', patience=3),
+                callbacks.ModelCheckpoint(filepath=PATH_MODELS + model_name+'{val_IoU:.2f}.hdf5',
+                                          monitor='val_IoU', mode='max', save_best_only=True, save_weights_only=False),
+                callbacks.EarlyStopping(monitor='val_loss', patience=3),
             ],
         )
     except KeyboardInterrupt:
@@ -122,23 +124,24 @@ def train(batchsize, epochs, l_nodes, l_dropouts, l_rate, momentum):
     print "Final Accuracy: {:.2f}%".format(accuracy * 100   )
 
 
-l_rates = [5e-5, 5e-4, 1e-4, 2e-5]
-l_nodes = [[100],[200],[500],[50],[1000]]
-dropouts = [[0],[0.25],[0.5]]
-epochs = 20
+l_rates = [1e-4,5e-4]
+l_nodes = [[128],[256],[512]]
+dropouts = [[0.5]]
+epochs = 30
+batch_size = 128
 
 for lr in l_rates:
     for nodes in l_nodes:
-        for dropouts in dropouts:
-            train(128,epochs,nodes,dropouts,lr,0.95)
+        for dropout in dropouts:
+            train(batch_size,epochs,nodes,dropout,lr,0.95)
 
+l_rates = [1e-4,5e-4]
+l_nodes = [[128]*2,[256]*2,[512]*2]
+dropouts = [[0.5]*2,[0.25]*2]
+epochs = 30
+batch_size = 128
 
-# l_rates = [1e-3, 5e-4, 1e-5]
-# l_nodes = [[100,100],[200,200],[500,500]]
-# dropouts = [[0,0],[0.5,0.5],[0,0.5]]
-# epochs = 20
-#
-# for lr in l_rates:
-#     for nodes in l_nodes:
-#         for dropouts in dropouts:
-#             train(200,epochs,nodes,dropouts,lr,0.95)
+for lr in l_rates:
+    for nodes in l_nodes:
+        for dropout in dropouts:
+            train(batch_size,epochs,nodes,dropout,lr,0.95)
