@@ -58,8 +58,8 @@ def train(batchsize, epochs, l_nodes, l_dropouts, l_rate, momentum, modules_to_d
 
     base_model = resnet50.ResNet50(include_top=False, weights='imagenet')
 
-    # To keep trainable last conv module use :147
-    for layer in base_model.layers[:159]:
+    # To keep trainable last conv module use :147, 153, 131, 121
+    for layer in base_model.layers[:147]:
         layer.trainable = False
 
     for i in range(layers_to_drop):
@@ -69,15 +69,20 @@ def train(batchsize, epochs, l_nodes, l_dropouts, l_rate, momentum, modules_to_d
 
     x = base_model.layers[-1].output
     x = GlobalAveragePooling2D()(x)
+    x = Dropout(0.5)(x)
 
     for nodes, dropout in zip(l_nodes, l_dropouts):
         x = Dense(nodes, activation='relu')(x)
         x = Dropout(dropout)(x)
-        
-    predictions = Dense(120, activation='softmax', kernel_regularizer=regularizers.l2(0.01))(x)
+
+    predictions = Dense(120, activation='softmax', kernel_regularizer=regularizers.l2(0.02))(x)
     model = Model(inputs=base_model.input, outputs=predictions)
 
     model.compile(optimizer=optimizers.RMSprop(lr=l_rate), loss='categorical_crossentropy', metrics=['acc'])
+    print model.summary()
+
+    for i,l in enumerate(model.layers):
+        print i,l.trainable,l
 
     try:
         model.fit_generator(
@@ -105,25 +110,24 @@ def train(batchsize, epochs, l_nodes, l_dropouts, l_rate, momentum, modules_to_d
     print "Final Accuracy: {:.2f}%".format(accuracy * 100)
 
 
-l_rates = [1e-3, 5e-4, 1e-5]
-l_nodes = [[100],[200],[500],[1000]]
-dropouts = [[0],[0.25],[0.5]]
-epochs = 20
-modules_to_drop = [0,1]
+l_rates = [1e-4,5e-4]
+l_nodes = [[128],[256],[512]]
+dropouts = [[0.5]]
+epochs = 30
+batch_size = 128
 
 for lr in l_rates:
     for nodes in l_nodes:
-        for dropouts in dropouts:
-            for to_drop in modules_to_drop:
-                train(200,epochs,nodes,dropouts,lr,0.95,to_drop)
+        for dropout in dropouts:
+            train(batch_size,epochs,nodes,dropout,lr,0.95)
 
+l_rates = [1e-4,5e-4]
+l_nodes = [[128]*2,[256]*2,[512]*2]
+dropouts = [[0.5]*2,[0.25]*2]
+epochs = 30
+batch_size = 128
 
-# l_rates = [1e-3, 5e-4, 1e-5]
-# l_nodes = [[100,100],[200,200],[500,500]]
-# dropouts = [[0,0],[0.5,0.5],[0,0.5]]
-# epochs = 20
-#
-# for lr in l_rates:
-#     for nodes in l_nodes:
-#         for dropouts in dropouts:
-#             train(200,epochs,nodes,dropouts,lr,0.95)
+for lr in l_rates:
+    for nodes in l_nodes:
+        for dropout in dropouts:
+            train(batch_size,epochs,nodes,dropout,lr,0.95)

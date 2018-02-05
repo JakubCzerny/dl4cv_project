@@ -13,7 +13,7 @@ from keras.applications import imagenet_utils
 from keras.layers import Dense, GlobalAveragePooling2D, Dropout, Flatten
 
 target_size = (350,350)
-batchsize = 1
+batchsize = 64
 
 PATH_TRAIN = 'data/train'
 PATH_TEST = 'data/test'
@@ -36,17 +36,18 @@ datagen = image.ImageDataGenerator(
 generator = datagen.flow_from_directory(
     PATH_TEST,
     batch_size=batchsize,
-    target_size=target_size
+    target_size=target_size,
+    shuffle=True,
 )
 num = generator.n
 
-# best_model = 'ResNet50_TUNE_CONV_10_1e-05_0.82.hdf5'
-best_model = 'ResNet50_FC_30_[700]_[0.5]_2e-05_1_0.81.hdf5'
+best_model = 'ResNet50_classifiacation_0.82.hdf5'
 model = load_model(PATH_MODELS+best_model)
 
 probs = []
 y = []
-for idx in range(int(2 / float(batchsize))):
+for idx in range(int(512 / float(batchsize))):
+    print idx
     x_batch,y_batch = generator.next()
     probs_batch = model.predict_on_batch(x_batch)
     y.extend(y_batch)
