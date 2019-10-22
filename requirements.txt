@@ -47,7 +47,7 @@ pbr==2.0.0
 pcp==1.0
 perf==0.1
 pexpect==2.3
-Pillow==2.0.0
+Pillow==6.2.0
 ply==3.4
 Pmw==1.3.2
 policycoreutils-default-encoding==0.1
