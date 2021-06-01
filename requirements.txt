@@ -100,7 +100,7 @@ targetcli-fb===2.1.fb41
 Twisted-Core==12.2.0
 Twisted-Web==12.1.0
 urlgrabber==3.10
-urllib3==1.10.2
+urllib3==1.26.5
 urwid==1.1.1
 virtualenv==1.10.1
 virtualenv-clone==0.2.6
