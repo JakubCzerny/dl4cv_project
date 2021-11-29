@@ -68,7 +68,7 @@ python-augeas==0.5.0
 python-dateutil==1.5
 python-dmidecode==3.10.13
 python-gflags==2.0
-python-ldap==2.4.15
+python-ldap==3.4.0
 python-meh==0.25.2
 python-nss==0.16.0
 python-yubico==1.2.3
