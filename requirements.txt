@@ -29,7 +29,7 @@ IPy==0.75
 ipython==3.2.1
 javapackages==1.0.0
 jsonschema==2.5.1
-jwcrypto==0.2.1
+jwcrypto==1.4
 kitchen==1.1.1
 kmod==0.1
 langtable==0.0.31
