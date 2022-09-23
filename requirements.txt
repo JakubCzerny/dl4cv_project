@@ -51,7 +51,7 @@ Pillow==2.0.0
 ply==3.4
 Pmw==1.3.2
 policycoreutils-default-encoding==0.1
-protobuf==2.5.0
+protobuf==3.18.3
 pyasn1==0.1.9
 pyasn1-modules==0.0.8
 pycparser==2.14
